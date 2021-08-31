@@ -44,6 +44,13 @@ trait ImportExcel
         return [];
     }
 
+    public function headers(){
+        return null;
+    }
+
+    public function rejectedExcelDownloadUrl(){
+        return url('system/download-rejected-data/');
+    }
 
     protected function prepareCsvData($data)
     {
@@ -79,6 +86,10 @@ trait ImportExcel
 
     public function insert(Collection $rows)
     {
+        $headers = $this->headers() ?? array_map(function($item){
+            return Str::title(implode(' ',explode('_',$item)));
+        },array_keys($rows->first()->toArray()));
+        array_push($headers,"Error Message");
         $this->totalRowsCount($rows);
         $model = $this->getModel();
         if (!$model && !$model instanceof \Illuminate\Database\Eloquent\Model) {
@@ -100,22 +111,22 @@ trait ImportExcel
                 continue;
             }
         }
-        return $this->exportRejectedData();
+        return $this->exportRejectedData($headers);
     }
 
 
-    public function exportRejectedData()
+    public function exportRejectedData($headers)
     {
         $messageBag = $this->getMessageBag();
         $excelName = Str::random(6) . '-RejectedData.xlsx';
         if (count($this->rejectedData) == $this->rowsCount) {
             $messageBag->add('alert-danger', 'No data imported. Rejected data excel is downloaded automatically for your reference');
-            Excel::store(new ExportRejectedData($this->rejectedData), '/rejected-excels/' . $excelName);
-            session()->flash('rejected_data_url', url(PREFIX . '/download-rejected-data/' . $excelName));
+            Excel::store(new ExportRejectedData($this->rejectedData,$headers), '/rejected-excels/' . $excelName);
+            session()->flash('rejected_data_url', $this->rejectedExcelDownloadUrl().'/'.$excelName);
         } else if (!empty($this->rejectedData)) {
-            Excel::store(new ExportRejectedData($this->rejectedData), '/rejected-excels/' . $excelName);
+            Excel::store(new ExportRejectedData($this->rejectedData,$headers), '/rejected-excels/' . $excelName);
             $messageBag->add('alert-success', "{$this->importCount} of {$this->rowsCount} data has been imported. Rejected data excel is downloaded automatically for your reference");
-            session()->flash('rejected_data_url', url(PREFIX . '/download-rejected-data/' . $excelName));
+            session()->flash('rejected_data_url',$this->rejectedExcelDownloadUrl().'/'.$excelName);
         } else {
             $messageBag->add('alert-success', 'All data has been imported.');
         }
