@@ -60,6 +60,7 @@ public function collection(Collection $rows)
 
 </script>
 ```
+7. Place ExportRejectedData.php inside App/Exports folder
 # How does it work ?
 Brief description of trait's functions
 | Function name | Arguments | Return value| Description
@@ -71,7 +72,7 @@ Brief description of trait's functions
 | getMessageBag | - | instance of messageBag | Collect the messages.
 | totalRowsCount | collection of all rows | total row count of collection. | -
 | headers | - | array | Headers for export excel of discarded rows.
-| rejectedExcelDownloadUrl | - | string | Export discarded excel download url is set here.   ``` default: url('system/download-rejected-data/')```.
+| rejectedExcelDownloadUrl | - | string | Export discarded excel download url is set here.   ``` default: url('download-rejected-data/')```.
 | prepareCsvData | collection/array | array | accept individual row and convert row data to array if it is a collection and return transformed data. 
 | transform | array | array | Transformed data in order to store in database and return transformed data.
 | validate | 1. array 2.callback | boolean | Validate individual row data against rule and execute callback if any.
